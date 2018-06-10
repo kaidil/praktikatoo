@@ -3,10 +3,7 @@ package com.example.demo.restservice.RestApp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller    // This means that this class is a Controller
 @RequestMapping(path = "/records")
@@ -28,6 +25,49 @@ public class MainController {
         RecordRepository.save(n);
         return "com.example.demo.restservice.RestApp.RestApp.Record Saved";
     }
+    // REST meetod muutmiseks
+    @PostMapping("/test")
+    public @ResponseBody
+    String test(@RequestParam String test){
+        return test;
+    }
+    @PostMapping("/change")
+    public @ResponseBody
+    String changeRecord(@RequestParam Long id, @RequestParam String type, @RequestParam String slotContent, @RequestParam String slotDesc,
+                        @RequestParam String slotSentence) {
+
+        Record n = new Record();
+        n = RecordRepository.findById(id).get();
+        if(type.equals("0")) {
+            n.setSlotContent(slotContent);
+            n.setSlotDesc(slotDesc);
+            n.setSlotSentence(slotSentence);
+        }
+        else if(slotContent.equals("0")) {
+            n.setType(type);
+            n.setSlotDesc(slotDesc);
+            n.setSlotSentence(slotSentence);
+        }
+        else if(slotDesc.equals("0")) {
+            n.setType(type);
+            n.setSlotContent(slotContent);
+            n.setSlotSentence(slotSentence);
+        }
+        else if(slotSentence.equals("0")) {
+            n.setType(type);
+            n.setSlotContent(slotContent);
+            n.setSlotDesc(slotDesc);
+        }
+        else {
+            n.setType(type);
+            n.setSlotContent(slotContent);
+            n.setSlotDesc(slotDesc);
+            n.setSlotSentence(slotSentence);
+        }
+        RecordRepository.save(n);
+        return("Muudetud!");
+
+    }
 
     // Rest meetod kõigi kirjete vaatamiseks
     @GetMapping(path = "/all")
@@ -37,9 +77,9 @@ public class MainController {
         return RecordRepository.findAll();
     }
 
-    @GetMapping(path = "/delete")
+    @PostMapping(path = "/delete")
     public @ResponseBody
-    String deleteUser(@RequestParam int id) {
+    String deleteUser(@RequestParam Long id) {
         // This returns a JSON or XML with the users
         Record n = new Record();
         n.setId(id);

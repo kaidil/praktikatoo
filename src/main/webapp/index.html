@@ -7,6 +7,7 @@
     <script>
         $(document).ready(function () {
             getRecords();
+            //post();
         });
 
         // Uue kirje lisamine
@@ -21,6 +22,60 @@
             xhr.open("GET", aadress, true)
             xhr.send()
             location.reload();
+
+        }
+        function changeRow(id){
+            let value_1 = document.getElementById(id+"change1").value
+            let value_2 = document.getElementById(id+"change2").value
+            let value_3 = document.getElementById(id+"change3").value
+            let value_4 = document.getElementById(id+"change4").value
+            let value_5 = document.getElementById(id+"change5").value
+
+            if (value_1 === "") {
+                value_1 = "0"
+            }
+            if (value_2 === "") {
+                value_2 = "0"
+            }
+            if (value_3 === "") {
+                value_3 = "0"
+            }
+            if (value_4 === "") {
+                value_4 = "0"
+            }
+            if (value_5 === "") {
+                value_5 = "0"
+            }
+            xhr.open("POST", "/records/change", true)
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+            xhr.onreadystatechange = function() {//Call a function when the state changes.
+                if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+                    console.log("updated.")
+                }
+            }
+            let request = "id="+value_1+"&type="+value_2+"&slotContent="+value_3+"&slotDesc="+value_4+"&slotSentence="+value_5
+            //let request = {"id":value_1, "type":value_2, "slotContent":value_3, "slotDesc":value_4,"slotSentence":value_5}
+            console.log(request)
+            xhr.send(request)
+            location.reload();
+        }
+
+        // Muutmine
+        function changeSelection(id) {
+            console.log(document.getElementsByClassName(id))
+            let list = document.getElementsByClassName(id)
+            console.log(list.length)
+            for(let i =0; list.length; i++){
+                if(list[i].style.display === 'none'){
+                    list[i].style.display = 'table-cell'
+                    console.log("blokiks")
+                }
+                else{
+                    list[i].style.display = 'none'
+                    console.log("tühjus")
+                }
+            }
+
         }
 
         // Kirje kustutamine. Kustutamine toimub record Id alusel
@@ -30,6 +85,24 @@
             xhr.send()
             location.reload();
         }
+
+        /*// otsingu funktsionaalsus
+        function showRecords(str) {
+            var xhttp;
+            if (str == "") {    // kontrollib, kas mingi valik on tehtud
+                document.getElementById("proov").innerHTML = "";
+                return;
+            }
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {   // Create the function to be executed when the server response is ready
+                    document.getElementById("txtHint").innerHTML = this.responseText;   // Send the request off to a file on the server
+                }
+            }
+        };
+        xhttp.open("GET", "getcustomer.asp?q="+str, true);
+        xhttp.send();
+        }*/
 
         //kutsub välja kasutajad
         function getRecords() {
@@ -44,19 +117,25 @@
                         $.each(result, function (i, record) {
                             // teen muutuja rcordRow
                             var recordRow = '<tr>' +
-                                '<td>' + record.id + '</td>' +
-                                '<td>' + record.type + '</td>' +
-                                '<td>' + record.slotContent + '</td>' +
-                                '<td>' + record.slotDesc + '</td>' +
-                                '<td>' + record.slotSentence + '</td>' +
+                               '<td style="display: none;" class=' + record.id + '><input id='+record.id+"change1"+' type="text" value=' + record.id + '></td>' +
+                                '<td style="display: none;" class='+record.id+'><input id='+record.id+"change2"+' type="text" value=' + record.type + '></td>' +
+                                '<td style="display: none;" class='+record.id+'><input id='+record.id+"change3"+' type="text" value=' + record.slotContent + '></td>' +
+                                '<td style="display: none;" class='+record.id+'><input id='+record.id+"change4"+' type="text" value=' + record.slotDesc + '></td>' +
+                                '<td style="display: none;" class='+record.id+'><input id='+record.id+"change5"+' type="text" value=' + record.slotSentence + '></td>'+
+                                '<td  class='+record.id+'>' + record.id + '</td>' +
+                                '<td  class='+record.id+'>' + record.type + '</td>' +
+                                '<td  class='+record.id+'>' + record.slotContent + '</td>' +
+                                '<td  class='+record.id+'>' + record.slotDesc + '</td>' +
+                                '<td  class='+record.id+'>' + record.slotSentence + '</td>' +
                                 '<td><button class="btn btn-sm btn-danger" onclick="deleteRecord(' + record.id + ');">Remove</button></td>' +
-                                '</tr>';
-
+                                '<td><button id='+record.id+' class="btn btn-sm btn-danger" onclick="changeSelection(' + record.id +' )">Change</button></td>' +
+                                '<td><button class="btn-sm brn-danger" onclick="changeRow(' + record.id +')">Push</button></td>' +
+                                '</<tr>';
                             $('#recordTable tbody').append(recordRow);
 
                         });
 
-                        $("#recordTable tbody tr:odd").addClass("info");
+                      $("#recordTable tbody tr:odd").addClass("info");
                         $("#recordTable tbody tr:even").addClass("success");
                     },
                     error: function (e) {
@@ -66,6 +145,11 @@
                 });
             }
         }
+
+        /*// THE AJAX SERVER PAGE
+        response.expires=-1
+        sql="SELECT * FROM record WHERE type= OR slot"
+        sql=sql & "'" & request.querystring("q") & "'"*/
 
     </script>
 </head>
@@ -77,8 +161,8 @@
     <input type="slotContent" id="slotContentBox" placeholder="Content" />
     <input type="slotDesc" id="slotDescBox" placeholder="Description" />
     <input type="slotSentence" id="slotSentenceBox" placeholder="Sentence" />
-
     <input type="submit" value="Add record" onclick="addRecord()"></div>
+
 
 <!-- Teen tabeli lehel kuvamiseks -->
 <div class="row col-md-7 table-responsive">
@@ -90,6 +174,8 @@
             <th>CONTENT</th>
             <th>DESCRIPTION</th>
             <th>SENTENCE</th>
+            <th></th>
+            <th></th>
             <th></th>
         </tr>
         </thead>
